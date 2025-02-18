@@ -8,18 +8,22 @@ const client = new Client({
     ]
 });
 
-let commit = await fetch("https://api.github.com/repos/asseukihuh/ai-webapp/commits");
-let message = commit[0]
+const fetchCommit = async () => {
+    const response = await fetch("https://api.github.com/repos/asseukihuh/ai-webapp/commits");
+    const commits = await response.json();
+    return commits[0].commit.message;
+};
 
 client.once('ready', () => {
     console.log('Bot is online!');
 });
 
-client.on('messageCreate', message => {
+client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
     if (message.content.startsWith('!commit')) {
-        message.reply(message);
+        const commitMessage = await fetchCommit();
+        message.reply(`Latest Commit: ${commitMessage}`);
     }
 });
 
