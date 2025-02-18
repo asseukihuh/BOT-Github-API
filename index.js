@@ -8,13 +8,7 @@ const client = new Client({
     ]
 });
 
-function calculate(expression) {
-    try {
-        return eval(expression);
-    } catch (error) {
-        return "Invalid expression!";
-    }
-}
+
 
 client.once('ready', () => {
     console.log('Bot is online!');
@@ -23,15 +17,8 @@ client.once('ready', () => {
 client.on('messageCreate', message => {
     if (message.author.bot) return;
 
-    if (message.content.startsWith('!calculate')) {
-        const expression = message.content.slice(11).trim();
+    if () {
         
-        if (expression) {
-            const result = calculate(expression);
-            message.reply(`Result: ${result}`);
-        } else {
-            message.reply("Please provide a mathematical expression.");
-        }
     }
 });
 
