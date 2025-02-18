@@ -1,51 +1,54 @@
-//IMPORT DISCORD JS
+// IMPORT DISCORD JS
 import { Client, GatewayIntentBits } from 'discord.js';
 
 function formatTimestamp(isoString) {
     const date = new Date(isoString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    return date.toISOString().replace('T', ' ').split('.')[0];
 }
 
-async function CheckCommits(prev){
+async function fetchCommit() {
     const url = "https://api.github.com/repos/asseukihuh/ai-webapp/commits";
-    const fetchCommit = async () => {
+    
+    try {
         const response = await fetch(url);
+        if (!response.ok) throw new Error("Failed to fetch commits");
         const commits = await response.json();
-        let current_commit = commits[0];
-    };
-    if()
+        return commits[0]; // Latest commit
+    } catch (error) {
+        console.error("Error fetching commits:", error);
+        return null;
+    }
+}
+
+async function CheckCommits() {
+    const latestCommit = await fetchCommit();
+    if (!latestCommit) return;
+
+    if (last_commit !== latestCommit.sha) {
+        last_commit = latestCommit.sha;
+
+        const channel = client.channels.cache.find(ch => ch.isTextBased());
+        if (channel) {
+            channel.send(`🚀 **New Commit Detected!**\n🕒 **Time:** ${formatTimestamp(latestCommit.commit.author.date)}\n👤 **By:** ${latestCommit.author.login}\n📜 **Message:** ${latestCommit.commit.message}\n🔗 [View Commit](${latestCommit.html_url})`);
+        }
+    }
 }
 
 const client = new Client({ 
     intents: [
         GatewayIntentBits.Guilds, 
-        GatewayIntentBits.GuildMessages, 
-        GatewayIntentBits.MessageContent
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
     ]
 });
 
 client.once('ready', () => {
     console.log('Bot is online!');
+    CheckCommits();
+    setInterval(CheckCommits, 60000);
 });
 
 let last_commit = null;
 
-client.on('messageCreate', async (message) => {
-    if (message.author.bot) return;
+client.login('YOUR_DISCORD_BOT_TOKEN');
 
-    if (message.content.startsWith('!commit')) {
-        const commits = await fetchCommit();
-        message.reply(`Commited at: ${formatTimestamp(commits.commit.author.date)}\nBy: ${commits.author.login}\nMessage: ${commits.commit.message}\nSee it here: ${commits.html_url}`);
-    }
-});
-
-setInterval(CheckCommits, 60000);
-
-client.login('');
