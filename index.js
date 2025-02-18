@@ -1,5 +1,5 @@
 //IMPORT DISCORD JS
-const { Client, GatewayIntentBits } = require('discord.js');
+import { Client, GatewayIntentBits } from 'discord.js';
 const client = new Client({ 
     intents: [
         GatewayIntentBits.Guilds, 
@@ -11,7 +11,7 @@ const client = new Client({
 const fetchCommit = async () => {
     const response = await fetch("https://api.github.com/repos/asseukihuh/ai-webapp/commits");
     const commits = await response.json();
-    return commits[0].commit.message;
+    return commits[0];
 };
 
 client.once('ready', () => {
@@ -22,8 +22,8 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
     if (message.content.startsWith('!commit')) {
-        const commitMessage = await fetchCommit();
-        message.reply(`Latest Commit: ${commitMessage}`);
+        const commits = await fetchCommit();
+        message.reply(`Commited at: ${commits.commit.author.date}\nBy: ${commits.author.login}\nMessage: ${commits.commit.message}\nSee it here: ${commits.html_url}`);
     }
 });
 
