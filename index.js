@@ -7,13 +7,13 @@ function formatTimestamp(isoString) {
 }
 
 async function fetchCommit() {
-    const url = "https://api.github.com/repos/asseukihuh/ai-webapp/commits";
+    const url = "https://api.github.com/repos/<username>/<repository>/commits";
     
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error("Failed to fetch commits");
         const commits = await response.json();
-        return commits[0]; // Latest commit
+        return commits[0];
     } catch (error) {
         console.error("Error fetching commits:", error);
         return null;
@@ -29,7 +29,7 @@ async function CheckCommits() {
 
         const channel = client.channels.cache.find(ch => ch.isTextBased());
         if (channel) {
-            channel.send(`🚀 **New Commit Detected!**\n🕒 **Time:** ${formatTimestamp(latestCommit.commit.author.date)}\n👤 **By:** ${latestCommit.author.login}\n📜 **Message:** ${latestCommit.commit.message}\n🔗 [View Commit](${latestCommit.html_url})`);
+            channel.send(`**Commited at :** ${formatTimestamp(latestCommit.commit.author.date)}\n**By :** ${latestCommit.author.login}\n**Message :** ${latestCommit.commit.message}\n[**View Commit**](${latestCommit.html_url})`);
         }
     }
 }
@@ -45,7 +45,7 @@ const client = new Client({
 client.once('ready', () => {
     console.log('Bot is online!');
     CheckCommits();
-    setInterval(CheckCommits, 60000);
+    setInterval(CheckCommits, 10000);
 });
 
 let last_commit = null;
