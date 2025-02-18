@@ -57,13 +57,37 @@ client.once('ready', () => {
     setInterval(CheckCommits, 60000);
 });
 
-client.on('messageCreate', message => {
+client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
     if (message.content.startsWith('!config_commit')) {
-        username = message.content.slice(15).trim();
-        username = username.replace(' ','/');
-        message.reply(username);
+        const args = message.content.slice(14).trim().split(/\s+/);
+        if (args.length !== 2) {
+            return message.reply("**Usage:** `!config_commit <user> <repository>`");
+        }
+
+        const newUsername = `${args[0]}/${args[1]}`;
+
+        // Validate if the repo exists before updating
+        try {
+            const response = await fetch(`https://api.github.com/repos/${newUsername}`, {
+                headers: {
+                    "Authorization": "Bearer TOKEN",
+                    "User-Agent": "discord-bot"
+                }
+            });
+
+            if (!response.ok) {
+                return message.reply("Repository not found! Please check the username and repository name.");
+            }
+
+            username = newUsername;
+            message.reply(`Repository updated to: **${username}**`);
+            console.log(`Updated repository path to: ${username}`);
+        } catch (error) {
+            console.error("Error checking repository:", error);
+            message.reply("Error validating the repository. Please try again.");
+        }
     }
 });
 
