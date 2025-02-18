@@ -13,6 +13,16 @@ function formatTimestamp(isoString) {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+async function CheckCommits(prev){
+    const url = "https://api.github.com/repos/asseukihuh/ai-webapp/commits";
+    const fetchCommit = async () => {
+        const response = await fetch(url);
+        const commits = await response.json();
+        let current_commit = commits[0];
+    };
+    if()
+}
+
 const client = new Client({ 
     intents: [
         GatewayIntentBits.Guilds, 
@@ -21,15 +31,11 @@ const client = new Client({
     ]
 });
 
-const fetchCommit = async () => {
-    const response = await fetch("https://api.github.com/repos/asseukihuh/ai-webapp/commits");
-    const commits = await response.json();
-    return commits[0];
-};
-
 client.once('ready', () => {
     console.log('Bot is online!');
 });
+
+let last_commit = null;
 
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
@@ -39,5 +45,7 @@ client.on('messageCreate', async (message) => {
         message.reply(`Commited at: ${formatTimestamp(commits.commit.author.date)}\nBy: ${commits.author.login}\nMessage: ${commits.commit.message}\nSee it here: ${commits.html_url}`);
     }
 });
+
+setInterval(CheckCommits, 60000);
 
 client.login('');
