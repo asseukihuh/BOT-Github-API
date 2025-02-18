@@ -7,7 +7,7 @@ function formatTimestamp(isoString) {
 }
 
 async function fetchCommit() {
-    const url = "https://api.github.com/repos/<username>/<repository>/commits";
+    const url = "https://api.github.com/repos/asseukihuh/ai-webapp/commits";
     
     try {
         const response = await fetch(url);
@@ -47,6 +47,18 @@ client.once('ready', () => {
     CheckCommits();
     setInterval(CheckCommits, 10000);
 });
+
+client.on('messageCreate', message => {
+    if (message.author.bot) return;
+
+    if (message.content.startsWith('!config_commit')) {
+        let username = message.content.slice(15).trim();
+        username = username.replace(' ','/');
+        message.reply(username);
+    }
+});
+
+client.on
 
 let last_commit = null;
 
