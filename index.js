@@ -6,11 +6,20 @@ function formatTimestamp(isoString) {
     return date.toISOString().replace('T', ' ').split('.')[0];
 }
 
+let username = `asseukihuh/AI-WebApp`;
+
 async function fetchCommit() {
-    const url = "https://api.github.com/repos/asseukihuh/ai-webapp/commits";
+    let url = `https://api.github.com/repos/${username}/commits`;
+    
+    console.log("Checking commits");
     
     try {
-        const response = await fetch(url);
+        const response = await fetch(url,{
+            headers: {
+                "Authorization": "Bearer TOKEN",
+                "User-Agent": "discord-bot"
+            }
+        });
         if (!response.ok) throw new Error("Failed to fetch commits");
         const commits = await response.json();
         return commits[0];
@@ -45,20 +54,18 @@ const client = new Client({
 client.once('ready', () => {
     console.log('Bot is online!');
     CheckCommits();
-    setInterval(CheckCommits, 10000);
+    setInterval(CheckCommits, 60000);
 });
 
 client.on('messageCreate', message => {
     if (message.author.bot) return;
 
     if (message.content.startsWith('!config_commit')) {
-        let username = message.content.slice(15).trim();
+        username = message.content.slice(15).trim();
         username = username.replace(' ','/');
         message.reply(username);
     }
 });
-
-client.on
 
 let last_commit = null;
 
