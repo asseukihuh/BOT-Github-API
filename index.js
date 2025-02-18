@@ -8,7 +8,8 @@ const client = new Client({
     ]
 });
 
-
+let commit = await fetch("https://api.github.com/repos/asseukihuh/ai-webapp/commits");
+let message = commit[0]
 
 client.once('ready', () => {
     console.log('Bot is online!');
@@ -17,8 +18,8 @@ client.once('ready', () => {
 client.on('messageCreate', message => {
     if (message.author.bot) return;
 
-    if () {
-        
+    if (message.content.startsWith('!commit')) {
+        message.reply(message);
     }
 });
 
