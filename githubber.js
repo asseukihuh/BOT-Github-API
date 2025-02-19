@@ -6,17 +6,15 @@ function formatTimestamp(isoString) {
     return date.toISOString().replace('T', ' ').split('.')[0];
 }
 
-let username = `asseukihuh/AI-WebApp`;
+const repoConfig = new Map();
 
-async function fetchCommit() {
-    let url = `https://api.github.com/repos/${username}/commits`;
-    
-    console.log("Checking commits");
-    
+async function fetchCommit(username) {
+    const url = `https://api.github.com/repos/${username}/commits`;
+
     try {
-        const response = await fetch(url,{
+        const response = await fetch(url, {
             headers: {
-                "Authorization": "Bearer TOKEN",
+                "Authorization": "Bearer YOUR_GITHUB_TOKEN",
                 "User-Agent": "discord-bot"
             }
         });
@@ -29,16 +27,18 @@ async function fetchCommit() {
     }
 }
 
-async function CheckCommits() {
-    const latestCommit = await fetchCommit();
-    if (!latestCommit) return;
+async function checkCommits() {
+    for (const [channelId, config] of repoConfig.entries()) {
+        const latestCommit = await fetchCommit(config.username);
+        if (!latestCommit) continue;
 
-    if (last_commit !== latestCommit.sha) {
-        last_commit = latestCommit.sha;
+        if (config.lastCommit !== latestCommit.sha) {
+            config.lastCommit = latestCommit.sha;
 
-        const channel = client.channels.cache.find(ch => ch.isTextBased());
-        if (channel) {
-            channel.send(`**Commited at :** ${formatTimestamp(latestCommit.commit.author.date)}\n**By :** ${latestCommit.author.login}\n**Message :** ${latestCommit.commit.message}\n[**View Commit**](${latestCommit.html_url})`);
+            const channel = client.channels.cache.get(channelId);
+            if (channel) {
+                channel.send(`**Commited at :** ${formatTimestamp(latestCommit.commit.author.date)}\n**By :** ${latestCommit.author.login}\n**Message :** ${latestCommit.commit.message}\n[**View Commit**](${latestCommit.html_url})`);
+            }
         }
     }
 }
@@ -53,8 +53,7 @@ const client = new Client({
 
 client.once('ready', () => {
     console.log('Bot is online!');
-    CheckCommits();
-    setInterval(CheckCommits, 60000);
+    setInterval(checkCommits, 60000);
 });
 
 client.on('messageCreate', async (message) => {
@@ -68,11 +67,10 @@ client.on('messageCreate', async (message) => {
 
         const newUsername = `${args[0]}/${args[1]}`;
 
-        // Validate if the repo exists before updating
         try {
             const response = await fetch(`https://api.github.com/repos/${newUsername}`, {
                 headers: {
-                    "Authorization": "Bearer TOKEN",
+                    "Authorization": "Bearer YOUR_GITHUB_TOKEN",
                     "User-Agent": "discord-bot"
                 }
             });
@@ -81,9 +79,9 @@ client.on('messageCreate', async (message) => {
                 return message.reply("Repository not found! Please check the username and repository name.");
             }
 
-            username = newUsername;
-            message.reply(`Repository updated to: **${username}**`);
-            console.log(`Updated repository path to: ${username}`);
+            repoConfig.set(message.channel.id, { username: newUsername, lastCommit: null });
+            message.reply(`This channel is now tracking: **${newUsername}**`);
+            console.log(`Updated repository path for channel ${message.channel.id} to: ${newUsername}`);
         } catch (error) {
             console.error("Error checking repository:", error);
             message.reply("Error validating the repository. Please try again.");
@@ -91,7 +89,4 @@ client.on('messageCreate', async (message) => {
     }
 });
 
-let last_commit = null;
-
 client.login('YOUR_DISCORD_BOT_TOKEN');
-
