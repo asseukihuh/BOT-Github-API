@@ -1,2 +1,11 @@
 # BOT-Github-REST
-This bot is able do send github notifications into your discord server
+
+Use this bot to get notifications of your github activity in your discord server !
+
+### Active functionnalities :
+
+```
+/config_commit username repostiory
+```
+
+Use this command to get your commit notifications in one of your discord server channel
